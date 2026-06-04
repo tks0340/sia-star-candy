@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>시아의 별사탕 줍기</title>
+  <style>
+    :root {
+      --ink: #3b3144;
+      --muted: #7b6f82;
+      --line: #eadfe8;
+      --pink: #ff7eaa;
+      --mint: #58cbbf;
+      --sun: #ffc84f;
+      --sky: #dff5ff;
+      --paper: #fffafd;
+      --bad: #4d8ee8;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #fff4fa 0%, #eaf9ff 70%, #fffdf4 100%);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      touch-action: manipulation;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .app {
+      width: min(100%, 430px);
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.28rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .best {
+      flex: 0 0 auto;
+      min-width: 78px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .7);
+      text-align: center;
+      font-weight: 800;
+      font-size: .82rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 7px 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .78);
+      text-align: center;
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: .68rem;
+      line-height: 1;
+    }
+
+    .value {
+      display: block;
+      margin-top: 3px;
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 0;
+      border: 1px solid #f0d7e4;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--sky);
+      box-shadow: 0 10px 24px rgba(77, 142, 232, .11);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: min(64vh, 430px);
+      min-height: 342px;
+      background: linear-gradient(180deg, #dff5ff 0%, #fff6db 100%);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(255, 250, 253, .88);
+      text-align: center;
+    }
+
+    .panel {
+      width: min(100%, 310px);
+      padding: 14px;
+      border: 1px solid #f0d7e4;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .92);
+    }
+
+    .panel strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 1.16rem;
+    }
+
+    .panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      color: #fff;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .start-btn {
+      width: 100%;
+      min-height: 44px;
+      background: linear-gradient(135deg, var(--pink), #ff9a71);
+      box-shadow: 0 8px 16px rgba(255, 126, 170, .24);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .move-btn {
+      min-height: 54px;
+      background: var(--mint);
+      box-shadow: 0 7px 14px rgba(88, 203, 191, .22);
+      font-size: 1.35rem;
+    }
+
+    .move-btn:active,
+    .start-btn:active {
+      transform: translateY(1px);
+      filter: brightness(.98);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-height: 670px) {
+      body {
+        padding: 7px;
+      }
+
+      .app {
+        gap: 6px;
+      }
+
+      h1 {
+        font-size: 1.08rem;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .stat {
+        padding: 6px 4px;
+      }
+
+      canvas {
+        height: min(61vh, 382px);
+        min-height: 300px;
+      }
+
+      .move-btn {
+        min-height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="시아의 별사탕 줍기 게임">
+    <header>
+      <div>
+        <h1>시아의 별사탕 줍기</h1>
+        <div class="subtitle">별과 하트를 담고 파란 빗방울은 피하기</div>
+      </div>
+      <div class="best">최고 <span id="bestScore">0</span></div>
+    </header>
+
+    <section class="stats" aria-live="polite">
+      <div class="stat">
+        <span class="label">점수</span>
+        <span class="value" id="scoreText">0</span>
+      </div>
+      <div class="stat">
+        <span class="label">시간</span>
+        <span class="value" id="timeText">45</span>
+      </div>
+      <div class="stat">
+        <span class="label">기회</span>
+        <span class="value" id="lifeText">3</span>
+      </div>
+    </section>
+
+    <section class="stage">
+      <canvas id="game" width="360" height="420" aria-label="게임 화면"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <strong id="overlayTitle">준비됐나요?</strong>
+          <p id="overlayText">좌우 버튼으로 바구니를 움직여 별사탕을 받아요.</p>
+          <button class="start-btn" id="startBtn" type="button">시작</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="이동 조작">
+      <button class="move-btn" id="leftBtn" type="button" aria-label="왼쪽으로 이동">◀</button>
+      <button class="move-btn" id="rightBtn" type="button" aria-label="오른쪽으로 이동">▶</button>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreText = document.getElementById("scoreText");
+    const timeText = document.getElementById("timeText");
+    const lifeText = document.getElementById("lifeText");
+    const bestScore = document.getElementById("bestScore");
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const startBtn = document.getElementById("startBtn");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+
+    const storageKey = "siaStarCandyBest20260605v1";
+    const world = { width: 360, height: 420 };
+    const player = { x: 180, y: 374, width: 68, height: 30, speed: 260 };
+    const state = {
+      running: false,
+      score: 0,
+      best: Number(localStorage.getItem(storageKey) || 0),
+      life: 3,
+      timeLeft: 45,
+      spawnTimer: 0,
+      lastTime: 0,
+      items: [],
+      move: 0,
+      finishReason: ""
+    };
+
+    bestScore.textContent = state.best;
+    drawScene();
+
+    function resetGame() {
+      state.running = true;
+      state.score = 0;
+      state.life = 3;
+      state.timeLeft = 45;
+      state.spawnTimer = 0;
+      state.lastTime = performance.now();
+      state.items = [];
+      state.move = 0;
+      state.finishReason = "";
+      player.x = world.width / 2;
+      overlay.hidden = true;
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    function endGame(reason) {
+      state.running = false;
+      state.finishReason = reason;
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem(storageKey, String(state.best));
+      }
+      bestScore.textContent = state.best;
+      overlayTitle.textContent = reason === "time" ? "시간 종료!" : "기회 끝!";
+      overlayText.textContent = `점수 ${state.score}점 · 최고 ${state.best}점`;
+      startBtn.textContent = "다시";
+      overlay.hidden = false;
+      drawScene();
+    }
+
+    function loop(now) {
+      if (!state.running) return;
+      const dt = Math.min((now - state.lastTime) / 1000, 0.033);
+      state.lastTime = now;
+
+      state.timeLeft -= dt;
+      if (state.timeLeft <= 0) {
+        state.timeLeft = 0;
+        updateHud();
+        endGame("time");
+        return;
+      }
+
+      updatePlayer(dt);
+      updateItems(dt);
+      drawScene();
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    function updatePlayer(dt) {
+      player.x += state.move * player.speed * dt;
+      if (player.x < player.width / 2) player.x = player.width / 2;
+      if (player.x > world.width - player.width / 2) player.x = world.width - player.width / 2;
+    }
+
+    function updateItems(dt) {
+      state.spawnTimer -= dt;
+      if (state.spawnTimer <= 0) {
+        spawnItem();
+        const faster = Math.min(state.score / 160, .28);
+        state.spawnTimer = Math.max(.34, .72 - faster + Math.random() * .12);
+      }
+
+      for (let i = state.items.length - 1; i >= 0; i--) {
+        const item = state.items[i];
+        item.y += item.speed * dt;
+        item.spin += item.spinSpeed * dt;
+
+        if (isCaught(item)) {
+          if (item.type === "rain") {
+            state.life -= 1;
+            state.score = Math.max(0, state.score - 5);
+            if (state.life <= 0) {
+              updateHud();
+              state.items.splice(i, 1);
+              endGame("life");
+              return;
+            }
+          } else {
+            state.score += item.type === "heart" ? 15 : 10;
+          }
+          state.items.splice(i, 1);
+        } else if (item.y > world.height + 24) {
+          state.items.splice(i, 1);
+        }
+      }
+    }
+
+    function spawnItem() {
+      const roll = Math.random();
+      const type = roll < .17 ? "rain" : roll < .35 ? "heart" : "star";
+      const size = type === "rain" ? 15 : 18;
+      state.items.push({
+        type,
+        x: 22 + Math.random() * (world.width - 44),
+        y: -24,
+        size,
+        speed: 92 + Math.random() * 54 + state.score * .08,
+        spin: Math.random() * Math.PI,
+        spinSpeed: (Math.random() * 2 - 1) * 2.4
+      });
+    }
+
+    function isCaught(item) {
+      const basketTop = player.y - player.height / 2;
+      const basketBottom = player.y + player.height / 2;
+      const basketLeft = player.x - player.width / 2;
+      const basketRight = player.x + player.width / 2;
+      return item.y + item.size > basketTop &&
+        item.y < basketBottom &&
+        item.x > basketLeft &&
+        item.x < basketRight;
+    }
+
+    function updateHud() {
+      scoreText.textContent = state.score;
+      timeText.textContent = Math.ceil(state.timeLeft);
+      lifeText.textContent = state.life;
+    }
+
+    function drawScene() {
+      ctx.clearRect(0, 0, world.width, world.height);
+      drawBackground();
+      state.items.forEach(drawItem);
+      drawPlayer();
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#dff5ff";
+      ctx.fillRect(0, 0, world.width, world.height);
+      ctx.fillStyle = "#fff6db";
+      ctx.fillRect(0, world.height - 52, world.width, 52);
+
+      drawCloud(52, 60, 1);
+      drawCloud(284, 86, .82);
+
+      ctx.fillStyle = "rgba(255, 255, 255, .56)";
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.arc(34 + i * 90, 160 + Math.sin(i) * 22, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawCloud(x, y, scale) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = "rgba(255, 255, 255, .84)";
+      ctx.beginPath();
+      ctx.arc(-22, 5, 17, 0, Math.PI * 2);
+      ctx.arc(-5, -5, 22, 0, Math.PI * 2);
+      ctx.arc(18, 5, 17, 0, Math.PI * 2);
+      ctx.fillRect(-36, 5, 72, 18);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawItem(item) {
+      ctx.save();
+      ctx.translate(item.x, item.y);
+      ctx.rotate(item.spin);
+      if (item.type === "heart") {
+        drawHeart(item.size);
+      } else if (item.type === "rain") {
+        drawDrop(item.size);
+      } else {
+        drawStar(item.size);
+      }
+      ctx.restore();
+    }
+
+    function drawStar(size) {
+      ctx.fillStyle = "#ffc84f";
+      ctx.strokeStyle = "#fff8c7";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const radius = i % 2 === 0 ? size : size * .45;
+        const angle = -Math.PI / 2 + i * Math.PI / 5;
+        ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawHeart(size) {
+      ctx.fillStyle = "#ff7eaa";
+      ctx.beginPath();
+      ctx.moveTo(0, size * .72);
+      ctx.bezierCurveTo(-size * 1.12, -size * .1, -size * .58, -size * .92, 0, -size * .42);
+      ctx.bezierCurveTo(size * .58, -size * .92, size * 1.12, -size * .1, 0, size * .72);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.beginPath();
+      ctx.arc(-size * .25, -size * .28, size * .16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawDrop(size) {
+      ctx.fillStyle = "#4d8ee8";
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.bezierCurveTo(size, -size * .1, size * .72, size, 0, size);
+      ctx.bezierCurveTo(-size * .72, size, -size, -size * .1, 0, -size);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.beginPath();
+      ctx.arc(-size * .22, -size * .1, size * .18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPlayer() {
+      const x = player.x;
+      const y = player.y;
+      ctx.save();
+      ctx.translate(x, y);
+
+      ctx.fillStyle = "#9b6cf0";
+      ctx.beginPath();
+      drawRoundRect(-player.width / 2, -6, player.width, 24, 8);
+      ctx.fill();
+
+      ctx.strokeStyle = "#6c4dc2";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, -6, 32, Math.PI, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(-14, 2, 4, 0, Math.PI * 2);
+      ctx.arc(14, 2, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#3b3144";
+      ctx.beginPath();
+      ctx.arc(-14, 2, 1.7, 0, Math.PI * 2);
+      ctx.arc(14, 2, 1.7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#3b3144";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 4, 8, 0, Math.PI);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawRoundRect(x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function setMove(value) {
+      state.move = value;
+    }
+
+    function bindMoveButton(button, value) {
+      button.addEventListener("pointerdown", () => setMove(value));
+      button.addEventListener("pointerup", () => setMove(0));
+      button.addEventListener("pointercancel", () => setMove(0));
+      button.addEventListener("pointerleave", () => setMove(0));
+    }
+
+    bindMoveButton(leftBtn, -1);
+    bindMoveButton(rightBtn, 1);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") setMove(-1);
+      if (event.key === "ArrowRight") setMove(1);
+      if (event.key === " " && !state.running) resetGame();
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") setMove(0);
+    });
+
+    startBtn.addEventListener("click", resetGame);
+  </script>
+</body>
+</html>
